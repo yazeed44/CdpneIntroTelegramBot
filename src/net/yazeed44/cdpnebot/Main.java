@@ -1,3 +1,4 @@
+package net.yazeed44.cdpnebot;
 
 public class Main {
 
