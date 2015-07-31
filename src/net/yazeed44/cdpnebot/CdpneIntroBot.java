@@ -59,26 +59,12 @@ public class CdpneIntroBot implements UpdatesCallback {
 				
 			}
 			
-			else if (!message.hasReplayMessage()){
-				return;
+			else if (message.hasReplayMessage()){
+				handleAnswers(message);
+				
 			}
 			
-			else if (hasAnswerdAboutCity(message)){
-				askAboutHobbies(message);
-			}
-			
-			else if (hasAnsweredAboutHobbies(message)){
-				askAboutPreferedTraitsInRoommate(message);
-			}
-			
-			else if (hasAnsweredAboutPreferedTraitsInRoommate(message)){
-				askAboutUnpreferedTraitsInRoomate(message);
-			}
-			
-			else if (hasAnsweredAboutUnpreferedTraitsInRoommate(message)){
-				congratulateOnCompletation(message);
-			}
-			
+						
 			
 			
 		}
@@ -87,9 +73,30 @@ public class CdpneIntroBot implements UpdatesCallback {
 		
 	}
 	
+	private void handleAnswers(final Message message){
+	    if (hasAnswerdAboutCity(message)){
+			askAboutHobbies(message);
+		}
+		
+		else if (hasAnsweredAboutHobbies(message)){
+			askAboutPreferedTraitsInRoommate(message);
+		}
+		
+		else if (hasAnsweredAboutPreferedTraitsInRoommate(message)){
+			askAboutUnpreferedTraitsInRoomate(message);
+		}
+		
+		else if (hasAnsweredAboutUnpreferedTraitsInRoommate(message)){
+			congratulateOnCompletation(message);
+		}
+
+	}
+	
 	private void congratulateOnCompletation(Message message) {
 		DEFAULT_MESSAGE.setText(CustomMessages.MESSAGE_CONGRATS_ON_COMPILATION);
+		DEFAULT_MESSAGE.setReplayMarkup(null);
 		replyAndSend(message);
+		DEFAULT_MESSAGE.setReplayMarkup(DEFAULT_FORCE_REPLY);
 		
 	}
 
@@ -102,18 +109,18 @@ public class CdpneIntroBot implements UpdatesCallback {
 		replyAndSend(message);
 	}
 
-	private boolean hasAnsweredAboutPreferedTraitsInRoommate(Message message) {
+	private boolean hasAnsweredAboutPreferedTraitsInRoommate(final Message message) {
 		
 		return CustomMessages.QUESTION_PREFERED_TRAITS_IN_ROOMMATE.equals(message.getReplyToMessage().getText());
 	}
 
-	private void askAboutPreferedTraitsInRoommate(Message message) {
+	private void askAboutPreferedTraitsInRoommate(final Message message) {
 		DEFAULT_MESSAGE.setText(CustomMessages.QUESTION_PREFERED_TRAITS_IN_ROOMMATE);
 		replyAndSend(message);
 		
 	}
 
-	private boolean hasAnsweredAboutHobbies(Message message) {
+	private boolean hasAnsweredAboutHobbies(final Message message) {
 		return CustomMessages.QUESTION_HOBBIES.equals(message.getReplyToMessage().getText());
 	}
 
