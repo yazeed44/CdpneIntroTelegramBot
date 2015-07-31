@@ -1,4 +1,5 @@
 package net.yazeed44.cdpnebot;
+import java.util.HashMap;
 import java.util.List;
 
 import org.telegram.BotConfig;
@@ -25,6 +26,7 @@ public class CdpneIntroBot implements UpdatesCallback {
     public static final SendMessage DEFAULT_MESSAGE = new SendMessage();
     public static final ForceReply DEFAULT_FORCE_REPLY = new ForceReply();
 	
+    public static final HashMap<Integer,Introduction> INTROS = new HashMap<>();
 	public CdpneIntroBot(){
 		if (BuildVars.useWebHook.booleanValue()) {
             webhook = new Webhook(this, webhookPort);
@@ -59,6 +61,10 @@ public class CdpneIntroBot implements UpdatesCallback {
 				
 			}
 			
+			else if (hasCommandedToDeleteIntro(message)){
+				deleteIntro(message);
+			}
+			
 			else if (message.hasReplayMessage()){
 				handleAnswers(message);
 				
@@ -73,20 +79,44 @@ public class CdpneIntroBot implements UpdatesCallback {
 		
 	}
 	
+	private void deleteIntro(Message message) {
+		DbUtil.deleteIntro(message.getFrom().getId());
+		DEFAULT_MESSAGE.setText(CustomMessages.MESSAGE_AFTER_DELETE_INTRO);
+		DEFAULT_MESSAGE.setReplayMarkup(null);
+		replyAndSend(message);
+		DEFAULT_MESSAGE.setReplayMarkup(DEFAULT_FORCE_REPLY);
+		
+	}
+
+	private boolean hasCommandedToDeleteIntro(Message message) {
+		return message.getText().startsWith(Commands.COMMAND_DELETE_INTRO);
+	}
+
 	private void handleAnswers(final Message message){
 	    if (hasAnswerdAboutCity(message)){
+	    	final Introduction intro = new Introduction(message.getText(),message.getFrom().getId());
+	    	INTROS.put(message.getFrom().getId(), intro);
 			askAboutHobbies(message);
 		}
 		
 		else if (hasAnsweredAboutHobbies(message)){
+			INTROS.get(message.getFrom().getId()).setHobbies(message.getText());
 			askAboutPreferedTraitsInRoommate(message);
 		}
 		
 		else if (hasAnsweredAboutPreferedTraitsInRoommate(message)){
+			INTROS.get(message.getFrom().getId()).setPreferedTraitsInRoommate(message.getText());
 			askAboutUnpreferedTraitsInRoomate(message);
 		}
 		
 		else if (hasAnsweredAboutUnpreferedTraitsInRoommate(message)){
+			final Introduction intro = INTROS.get(message.getFrom().getId());
+			if (intro == null){
+				return;
+			}
+			intro.setUnpreferedTraitsInRoommate(message.getText());
+			DbUtil.insertIntro(intro);
+			INTROS.remove(message.getFrom().getId());
 			congratulateOnCompletation(message);
 		}
 
@@ -101,11 +131,11 @@ public class CdpneIntroBot implements UpdatesCallback {
 	}
 
 	private boolean hasAnsweredAboutUnpreferedTraitsInRoommate(final Message message) {
-		return CustomMessages.QUESTION_UNPREFERED_TRAITS_IN_ROOMATE.equals(message.getReplyToMessage().getText());
+		return CustomMessages.QUESTION_UNPREFERED_TRAITS_IN_ROOMMATE.equals(message.getReplyToMessage().getText());
 	}
 
 	private void askAboutUnpreferedTraitsInRoomate(final Message message) {
-		DEFAULT_MESSAGE.setText(CustomMessages.QUESTION_UNPREFERED_TRAITS_IN_ROOMATE);
+		DEFAULT_MESSAGE.setText(CustomMessages.QUESTION_UNPREFERED_TRAITS_IN_ROOMMATE);
 		replyAndSend(message);
 	}
 

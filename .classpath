@@ -3,5 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="/org.telegram.botapi"/>
+	<classpathentry kind="lib" path="/home/yazeed44/Desktop/downloadLinux/sqlite4java-392/sqlite4java.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

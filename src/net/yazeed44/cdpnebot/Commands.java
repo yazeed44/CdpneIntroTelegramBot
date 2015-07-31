@@ -9,4 +9,5 @@ public final class Commands {
 	public final static String COMMAND_START = "/start";
 	public final static String COMMAND_BROWSE_INTRODUCTION = "/intros";
 	public final static String COMMAND_BROWSE_SPECTIFC_INTRODUCTION = "/intro";
+	public static final String COMMAND_DELETE_INTRO = "/deleteintro";
 }
