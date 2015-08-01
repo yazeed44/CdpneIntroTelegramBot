@@ -81,11 +81,11 @@ public final class DbUtil {
 	private static void bindIntroToStatement(SQLiteStatement st,Introduction intro) {
 				
 		try {
-			st.bind(getUserIdIndex(st), intro.userId)
-			.bind(getCityIndex(st), intro.city)
-			.bind(getHobbiesIndex(st), intro.hobbies)
-			.bind(getPreferedTraitsIndex(st), intro.preferedTraitsInRoommate)
-			.bind(getUnpreferedTraitsIndex(st), intro.unpreferedTraitsInRoommate)
+			st.bind(getUserIdIndex(st)+1, intro.userId)
+			.bind(getCityIndex(st)+1, intro.city)
+			.bind(getHobbiesIndex(st)+1, intro.hobbies)
+			.bind(getPreferedTraitsIndex(st)+1, intro.preferedTraitsInRoommate)
+			.bind(getUnpreferedTraitsIndex(st)+1, intro.unpreferedTraitsInRoommate)
 			;
 		} catch (SQLiteException e) {
 			// TODO Auto-generated catch block
@@ -148,8 +148,7 @@ public final class DbUtil {
 		final Introduction intro = new Introduction(st.columnInt(getUserIdIndex(st)),st.columnString(getCityIndex(st)));
 		intro.setHobbies(st.columnString(getHobbiesIndex(st)));
 		intro.setPreferedTraitsInRoommate(st.columnString(getPreferedTraitsIndex(st)));
-		final String unprefered = st.columnString(getUnpreferedTraitsIndex(st));
-		intro.setUnpreferedTraitsInRoommate(unprefered);
+		intro.setUnpreferedTraitsInRoommate(st.columnString(getUnpreferedTraitsIndex(st)));
 		System.out.println(intro);
 		return intro;
 	}
