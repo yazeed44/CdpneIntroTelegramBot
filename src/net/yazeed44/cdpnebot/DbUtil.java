@@ -34,7 +34,7 @@ public final class DbUtil {
 	
 	public final static String TABLE_INTROS = "intros";
 	
-	public final static SQLiteConnection DB = new SQLiteConnection(new File("intros"));
+	public final static SQLiteConnection DB = new SQLiteConnection(new File("db/intros"));
 
 	private DbUtil(){
 		
