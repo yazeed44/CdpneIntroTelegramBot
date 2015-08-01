@@ -18,4 +18,6 @@ public final class CustomMessages {
 			+ Commands.COMMAND_DELETE_INTRO;
 
 	public static final String MESSAGE_AFTER_DELETE_INTRO = "تم حذف التعريف بنجاح \n أستخدم أمر /start \n لإدخال تعريف جديد";
+
+	public static final String MESSAGE_YOU_ALREADY_CREATED_AN_INTRO = "يوجد تعريف مرتبط بهذا الحساب , لحذف التعريف \n /deleteintro";
 }

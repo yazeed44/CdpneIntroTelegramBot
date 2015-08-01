@@ -57,7 +57,8 @@ public class CdpneIntroBot implements UpdatesCallback {
 			
 			
 			if (hasCommandedToStart(message)){
-				askAboutCity(message);
+				
+				handleStartCommand(message);
 				
 			}
 			
@@ -70,15 +71,30 @@ public class CdpneIntroBot implements UpdatesCallback {
 				
 			}
 			
-						
-			
-			
 		}
 		
 		
 		
 	}
 	
+	private void handleStartCommand(final Message message){
+		if (DbUtil.getIntro(message.getFrom().getId()) == null){
+			askAboutCity(message);
+		}
+		
+		else {
+			explainHowToDeleteIntro(message);
+		}
+	}
+	
+	private void explainHowToDeleteIntro(final Message message) {
+		DEFAULT_MESSAGE.setText(CustomMessages.MESSAGE_YOU_ALREADY_CREATED_AN_INTRO);
+		DEFAULT_MESSAGE.setReplayMarkup(null);
+		replyAndSend(message);
+		DEFAULT_MESSAGE.setReplayMarkup(DEFAULT_FORCE_REPLY);
+		
+	}
+
 	private void deleteIntro(Message message) {
 		DbUtil.deleteIntro(message.getFrom().getId());
 		DEFAULT_MESSAGE.setText(CustomMessages.MESSAGE_AFTER_DELETE_INTRO);
@@ -94,7 +110,7 @@ public class CdpneIntroBot implements UpdatesCallback {
 
 	private void handleAnswers(final Message message){
 	    if (hasAnswerdAboutCity(message)){
-	    	final Introduction intro = new Introduction(message.getText(),message.getFrom().getId());
+	    	final Introduction intro = new Introduction(message.getFrom().getId(),message.getText());
 	    	INTROS.put(message.getFrom().getId(), intro);
 			askAboutHobbies(message);
 		}
