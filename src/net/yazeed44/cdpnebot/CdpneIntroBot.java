@@ -9,6 +9,7 @@ import org.telegram.SenderHelper;
 import org.telegram.api.ForceReply;
 import org.telegram.api.Message;
 import org.telegram.api.Update;
+import org.telegram.api.User;
 import org.telegram.methods.SendMessage;
 import org.telegram.updateshandlers.UpdatesCallback;
 import org.telegram.updatesreceivers.UpdatesThread;
@@ -55,13 +56,17 @@ public class CdpneIntroBot implements UpdatesCallback {
 	@Override
 	public void onUpdateReceived(Update update) {
             
+		if (update.getMessage().getNewChatParticipant() != null){
+			sendWelcomeMessage(update.getMessage());
+		}
+		
 		
 		if (update.getMessage() != null && update.getMessage().hasText()){
 			final Message message = update.getMessage();
-			System.out.println(message.getText());
 			
 			
-			if (hasCommandedToStart(message)){
+			
+			 if (hasCommandedToStart(message)){
 				
 				handleStartCommand(message);
 				
@@ -92,6 +97,13 @@ public class CdpneIntroBot implements UpdatesCallback {
 		
 	}
 	
+	private void sendWelcomeMessage(final Message message) {
+		
+		DEFAULT_MESSAGE.setText("أهلا بك يا  " + message.getNewChatParticipant().getFirstName() + " " + CustomMessages.MESSAGE_WELCOME_NEW_MEMBER);
+		replyWithoutForce(message);
+		
+	}
+
 	private void setup(){
 		DEFAULT_FORCE_REPLY.setForceReply(true);
 		DEFAULT_FORCE_REPLY.setSelective(true);
