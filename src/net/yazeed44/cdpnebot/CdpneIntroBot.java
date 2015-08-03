@@ -1,4 +1,5 @@
 package net.yazeed44.cdpnebot;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -66,6 +67,16 @@ public class CdpneIntroBot implements UpdatesCallback {
 				deleteIntro(message);
 			}
 			
+			else if (hasCommandedToBrowseAllIntros(message)){
+				queryAllIntrosAndShowThem(message);
+			}
+			
+			else if (hasCommandedToSearchSpectifcIntro(message)){
+				queryUserAndShowIntro(message);
+			}
+			
+			
+			
 			else if (message.hasReplayMessage()){
 				handleAnswers(message);
 				
@@ -77,8 +88,79 @@ public class CdpneIntroBot implements UpdatesCallback {
 		
 	}
 	
+	private void queryAllIntrosAndShowThem(final Message message) {
+		final ArrayList<Introduction> intros = DbUtil.getIntros();
+		
+		if (intros.isEmpty()){
+			DEFAULT_MESSAGE.setText(CustomMessages.MESSAGE_THERE_IS_NO_INTROS);
+			replyWithoutForce(message);
+		}
+		
+		else {
+			final StringBuilder introsTextBuilder = new StringBuilder();
+			
+			for(final Introduction intro : intros){
+				
+				introsTextBuilder.append(intro.generateIntroText())
+				.append("\n \n")
+				;
+				
+			}
+			
+			DEFAULT_MESSAGE.setText(introsTextBuilder.toString());
+			replyWithoutForce(message);
+			intros.clear();
+		}
+		
+	}
+
+	private boolean hasCommandedToBrowseAllIntros(final Message message) {
+		
+		return message.getText().startsWith(Commands.COMMAND_BROWSE_ALL_INTRODUCTIONS);
+	}
+
+	private void queryUserAndShowIntro(final Message message) {
+		final String command = message.getText();
+		final String username;
+		
+		 
+		 if (command.contains(" ")){
+			 username = command.split(" ")[1];
+			 
+			 if (!DbUtil.isUserInsertedInDb(username)){
+				 DEFAULT_MESSAGE.setText(CustomMessages.MESSAGE_USER_HAS_NO_INTRO);
+				 replyWithoutForce(message);
+				 return;
+			 }
+			 
+		 }
+		 
+		 else {
+			 //By default the username is the caller username
+			 if (DbUtil.isUserInsertedInDb(message.getFrom().getId())){
+				 username = message.getFrom().getUserName();
+				 
+			 }
+			 else {
+				 handleStartCommand(message);
+				 return;
+			 }
+		 }
+		 
+		 final Introduction intro = DbUtil.getIntro(username);
+		 
+		 DEFAULT_MESSAGE.setText(intro.generateIntroText());
+		 replyWithoutForce(message);
+		 
+	}
+
+	private boolean hasCommandedToSearchSpectifcIntro(final Message message) {
+		return message.getText().startsWith(Commands.COMMAND_SEARCH_FOR_SPECTIFC_INTRODUCTION);
+	}
+
 	private void handleStartCommand(final Message message){
-		if (DbUtil.getIntro(message.getFrom().getId()) == null){
+		if (!DbUtil.isUserInsertedInDb(message.getFrom().getId())){
+			//He isn't registerd in db
 			askAboutCity(message);
 		}
 		
@@ -87,20 +169,17 @@ public class CdpneIntroBot implements UpdatesCallback {
 		}
 	}
 	
+	
 	private void explainHowToDeleteIntro(final Message message) {
 		DEFAULT_MESSAGE.setText(CustomMessages.MESSAGE_YOU_ALREADY_CREATED_AN_INTRO);
-		DEFAULT_MESSAGE.setReplayMarkup(null);
-		replyAndSend(message);
-		DEFAULT_MESSAGE.setReplayMarkup(DEFAULT_FORCE_REPLY);
+		replyWithoutForce(message);
 		
 	}
 
 	private void deleteIntro(Message message) {
 		DbUtil.deleteIntro(message.getFrom().getId());
 		DEFAULT_MESSAGE.setText(CustomMessages.MESSAGE_AFTER_DELETE_INTRO);
-		DEFAULT_MESSAGE.setReplayMarkup(null);
-		replyAndSend(message);
-		DEFAULT_MESSAGE.setReplayMarkup(DEFAULT_FORCE_REPLY);
+		replyWithoutForce(message);
 		
 	}
 
@@ -111,6 +190,7 @@ public class CdpneIntroBot implements UpdatesCallback {
 	private void handleAnswers(final Message message){
 	    if (hasAnswerdAboutCity(message)){
 	    	final Introduction intro = new Introduction(message.getFrom().getId(),message.getText());
+	    	intro.setUsername(message.getFrom().getUserName());
 	    	INTROS.put(message.getFrom().getId(), intro);
 			askAboutHobbies(message);
 		}
@@ -196,6 +276,12 @@ public class CdpneIntroBot implements UpdatesCallback {
 		DEFAULT_MESSAGE.setChatId(message.getChatId());
 		DEFAULT_MESSAGE.setReplayToMessageId(message.getMessageId());
 		SenderHelper.SendMessage(DEFAULT_MESSAGE, TOKEN);
+	}
+	
+	private void replyWithoutForce(final Message mesasge){
+		DEFAULT_MESSAGE.setReplayMarkup(null);
+		replyAndSend(mesasge);
+		DEFAULT_MESSAGE.setReplayMarkup(DEFAULT_FORCE_REPLY);
 	}
 
 

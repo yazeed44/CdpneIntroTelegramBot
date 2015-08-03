@@ -1,6 +1,7 @@
 package net.yazeed44.cdpnebot;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import com.almworks.sqlite4java.SQLParts;
 import com.almworks.sqlite4java.SQLiteConnection;
@@ -27,6 +28,8 @@ public final class DbUtil {
 	
 	
 	public final static String COLUMN_UNPREFERED_TRAITS_IN_ROOMMATE = "unpreferedTraitsInRoommate";
+	
+	public final static String COLUMN_USERNAME = "username";
 	
 	
 	
@@ -58,12 +61,13 @@ public final class DbUtil {
 		.append(COLUMN_PREFERED_TRAITS_IN_ROOMMATE)
 		.append(",")
 		.append(COLUMN_UNPREFERED_TRAITS_IN_ROOMMATE)
+		.append(",")
+		.append(COLUMN_USERNAME)
 		.append(") ")
 		.append("VALUES(")
-		.appendParams(5)
+		.appendParams(6)
 		.append(");");
 		
-		 System.out.println("Statement is  " + sqlParts.toString());
 		 
 		 try {
 			final SQLiteStatement st = DB.prepare(sqlParts);
@@ -86,6 +90,7 @@ public final class DbUtil {
 			.bind(getHobbiesIndex(st)+1, intro.hobbies)
 			.bind(getPreferedTraitsIndex(st)+1, intro.preferedTraitsInRoommate)
 			.bind(getUnpreferedTraitsIndex(st)+1, intro.unpreferedTraitsInRoommate)
+			.bind(getUsernameIndex()+1, intro.username)
 			;
 		} catch (SQLiteException e) {
 			// TODO Auto-generated catch block
@@ -131,25 +136,77 @@ public final class DbUtil {
 		try {
 			final SQLiteStatement st = DB.prepare("SELECT * FROM " + TABLE_INTROS + " WHERE " + COLUMN_USER_ID + " = " + userId );
 			
-			System.out.println(st.getBindParameterCount());
-			
 			st.step();
 			final Introduction intro = createIntro(st);
 			st.dispose();
 			return intro;
 		} catch (SQLiteException e) {
-			e.printStackTrace();
+			System.out.println("There's no row ith userId  " + userId);
 		}
 		
 		return null;
 	}
+	
+	public static Introduction getIntro(String username){
+		
+		if (username.startsWith("@")){
+			username = username.replace("@", "");
+		}
+		
+		openDb();
+		
+		try {
+			final SQLiteStatement st = DB.prepare("SELECT * FROM " + TABLE_INTROS + " WHERE " + COLUMN_USERNAME + " = " + "'" + username + "';" );
+			
+			st.step();
+			final Introduction intro = createIntro(st);
+			st.dispose();
+			return intro;
+		}
+		
+		catch(final SQLiteException e){
+			System.out.println("There's no username with  " + username);
+		}
+		
+		return null;
+		
+		
+	}
+	
+
+	public static boolean isUserInsertedInDb(final int userId){
+		return DbUtil.getIntro(userId) != null;
+	}
+	
+	public static boolean isUserInsertedInDb(final String username){
+		return DbUtil.getIntro(username) != null;
+	}
+	
+	public static ArrayList<Introduction> getIntros(){
+		openDb();
+		final ArrayList<Introduction> intros = new ArrayList<>();
+		try {
+			final SQLiteStatement st = DB.prepare("SELECT * FROM " + TABLE_INTROS);
+			
+			while(st.step()){
+				intros.add(createIntro(st));
+			}
+			
+			st.dispose();
+			
+		} catch (SQLiteException e) {
+			e.printStackTrace();
+		}
+		
+		return intros;
+	}
 
 	private static Introduction createIntro(SQLiteStatement st) throws SQLiteException {
 		final Introduction intro = new Introduction(st.columnInt(getUserIdIndex(st)),st.columnString(getCityIndex(st)));
+		intro.setUsername(st.columnString(getUsernameIndex()));
 		intro.setHobbies(st.columnString(getHobbiesIndex(st)));
 		intro.setPreferedTraitsInRoommate(st.columnString(getPreferedTraitsIndex(st)));
 		intro.setUnpreferedTraitsInRoommate(st.columnString(getUnpreferedTraitsIndex(st)));
-		System.out.println(intro);
 		return intro;
 	}
 	
@@ -172,5 +229,9 @@ public final class DbUtil {
 	
 	private static int getUnpreferedTraitsIndex(final SQLiteStatement st) throws SQLiteException{
 		return 4;
+	}
+	
+	private static int getUsernameIndex() throws SQLiteException{
+		return 5;
 	}
 }
