@@ -41,14 +41,18 @@ public class CdpneIntroBot implements UpdatesCallback {
 		setup();
 	}
 	
-	private void setup(){
-		DEFAULT_FORCE_REPLY.setForceReply(true);
-		DEFAULT_FORCE_REPLY.setSelective(true);
+	@Override
+	public void onUpdatesReceived(List<Update> updates) {
 		
-		DEFAULT_MESSAGE.setReplayMarkup(DEFAULT_FORCE_REPLY);
+		
+		for(final Update update : updates){
+			onUpdateReceived(update);
+		}
+		
+		
 	}
-
-
+	
+	@Override
 	public void onUpdateReceived(Update update) {
             
 		
@@ -87,6 +91,16 @@ public class CdpneIntroBot implements UpdatesCallback {
 		
 		
 	}
+	
+	private void setup(){
+		DEFAULT_FORCE_REPLY.setForceReply(true);
+		DEFAULT_FORCE_REPLY.setSelective(true);
+		
+		DEFAULT_MESSAGE.setReplayMarkup(DEFAULT_FORCE_REPLY);
+	}
+
+
+	
 	
 	private void queryAllIntrosAndShowThem(final Message message) {
 		final ArrayList<Introduction> intros = DbUtil.getIntros();
@@ -161,7 +175,17 @@ public class CdpneIntroBot implements UpdatesCallback {
 	private void handleStartCommand(final Message message){
 		if (!DbUtil.isUserInsertedInDb(message.getFrom().getId())){
 			//He isn't registerd in db
-			askAboutCity(message);
+			
+			if (message.getFrom().getUserName().isEmpty()){
+				//Has no username
+				tellCallerToCreateUsername(message);
+				return;
+			}
+			
+			else {
+				askAboutCity(message);
+			}
+			
 		}
 		
 		else {
@@ -170,6 +194,12 @@ public class CdpneIntroBot implements UpdatesCallback {
 	}
 	
 	
+	private void tellCallerToCreateUsername(final Message message) {
+		DEFAULT_MESSAGE.setText(CustomMessages.MESSAGE_CALLER_HAS_NO_USERNAME);
+		replyWithoutForce(message);
+		
+	}
+
 	private void explainHowToDeleteIntro(final Message message) {
 		DEFAULT_MESSAGE.setText(CustomMessages.MESSAGE_YOU_ALREADY_CREATED_AN_INTRO);
 		replyWithoutForce(message);
@@ -285,15 +315,7 @@ public class CdpneIntroBot implements UpdatesCallback {
 	}
 
 
-	public void onUpdatesReceived(List<Update> updates) {
-		
-		
-		for(final Update update : updates){
-			onUpdateReceived(update);
-		}
-		
-		
-	}
+	
 
 	
 

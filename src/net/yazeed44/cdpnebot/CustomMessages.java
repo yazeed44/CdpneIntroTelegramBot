@@ -24,4 +24,6 @@ public final class CustomMessages {
 	public static final String MESSAGE_THERE_IS_NO_INTROS = "لايوجد أي تعاريف مسجلة في قاعدة البيانات , لادخال تعريف جديد استخدم \n" + Commands.COMMAND_START;
 
 	public static final String MESSAGE_USER_HAS_NO_INTRO = "هذا المستخدم ليس لديه تعريف";
+
+	public static final String MESSAGE_CALLER_HAS_NO_USERNAME = "حسابك لايحتوي على اسم مستخدم " + " Username" ;
 }
