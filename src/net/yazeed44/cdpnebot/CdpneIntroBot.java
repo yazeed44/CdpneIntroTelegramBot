@@ -10,7 +10,10 @@ import org.telegram.api.ForceReply;
 import org.telegram.api.Message;
 import org.telegram.api.Update;
 import org.telegram.api.User;
+import org.telegram.api.Video;
+import org.telegram.methods.SendDocument;
 import org.telegram.methods.SendMessage;
+import org.telegram.methods.SendVideo;
 import org.telegram.updateshandlers.UpdatesCallback;
 import org.telegram.updatesreceivers.UpdatesThread;
 import org.telegram.updatesreceivers.Webhook;
@@ -98,10 +101,8 @@ public class CdpneIntroBot implements UpdatesCallback {
 	}
 	
 	private void sendWelcomeMessage(final Message message) {
-		
 		DEFAULT_MESSAGE.setText("أهلا بك يا  " + message.getNewChatParticipant().getFirstName() + " " + CustomMessages.MESSAGE_WELCOME_NEW_MEMBER);
 		replyWithoutForce(message);
-		
 	}
 
 	private void setup(){

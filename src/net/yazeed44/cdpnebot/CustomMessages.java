@@ -27,5 +27,5 @@ public final class CustomMessages {
 
 	public static final String MESSAGE_CALLER_HAS_NO_USERNAME = "حسابك لايحتوي على اسم مستخدم " + " Username" ;
 
-	public static final String MESSAGE_WELCOME_NEW_MEMBER = " . لإدخال تعريف بالنفس أستخدم أمر  " + "\n" + Commands.COMMAND_START;
+	public static final String MESSAGE_WELCOME_NEW_MEMBER = " . لإدخال تعريف بالنفس أستخدم أمر  " + "\n" + Commands.COMMAND_START + "\n"+ "سوف يتم ارسال فيديو لتوضيح طريقة ادخال تعريف";
 }
