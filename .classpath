@@ -3,6 +3,5 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="src" path="/org.telegram.botapi"/>
-	<classpathentry exported="true" kind="lib" path="/home/yazeed44/Desktop/downloadLinux/sqlite4java-392/sqlite4java.jar" sourcepath="/home/yazeed44/Desktop/downloadLinux/sqlite4java-392/sqlite4java-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,12 +1,12 @@
 package net.yazeed44.cdpnebot;
 
 import java.io.File;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
-import com.almworks.sqlite4java.SQLParts;
-import com.almworks.sqlite4java.SQLiteConnection;
-import com.almworks.sqlite4java.SQLiteException;
-import com.almworks.sqlite4java.SQLiteStatement;
+import org.telegram.database.ConectionDB;
 
 public final class DbUtil {
 	
@@ -37,20 +37,45 @@ public final class DbUtil {
 	
 	public final static String TABLE_INTROS = "intros";
 	
-	public final static SQLiteConnection DB = new SQLiteConnection(new File("db/intros"));
+	public static final ConectionDB DB = new ConectionDB();
+	
+	
 
 	private DbUtil(){
 		
 		
 	}
 	
-	public static void insertIntro(final Introduction intro){
+	
+	private static void openDb(){
+		
+	}
+	
+	public static boolean insertIntro(final Introduction intro){
 		openDb();
+		int updatedRows = 0;
 		
-		final SQLParts sqlParts = new SQLParts();
+		try {
+			final PreparedStatement insertStatement = DB.getPreparedStatement(createSqlInsert());
+			
+			bindIntroToStatement(insertStatement,intro);
 		
-		sqlParts.append("INSERT INTO ")
-		.append(TABLE_INTROS)
+			updatedRows = insertStatement.executeUpdate();
+		}
+		
+		catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		 
+		 
+		 return updatedRows > 0;
+	}
+	
+	private static String createSqlInsert(){
+		final StringBuilder insertBuilder = new StringBuilder("INSERT INTO ");
+		
+		return insertBuilder.append(TABLE_INTROS)
 		.append("(")
 		.append(COLUMN_USER_ID)
 		.append(",")
@@ -63,85 +88,64 @@ public final class DbUtil {
 		.append(COLUMN_UNPREFERED_TRAITS_IN_ROOMMATE)
 		.append(",")
 		.append(COLUMN_USERNAME)
-		.append(") ")
-		.append("VALUES(")
-		.appendParams(6)
-		.append(");");
+		.append(") VALUES(?,?,?,?,?,?);")
+		.toString();
 		
-		 
-		 try {
-			final SQLiteStatement st = DB.prepare(sqlParts);
-			bindIntroToStatement(st,intro);
-			stepAndDispose(st);
-		} catch (SQLiteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
 	
 
 
-	private static void bindIntroToStatement(SQLiteStatement st,Introduction intro) {
-				
-		try {
-			st.bind(getUserIdIndex(st)+1, intro.userId)
-			.bind(getCityIndex(st)+1, intro.city)
-			.bind(getHobbiesIndex(st)+1, intro.hobbies)
-			.bind(getPreferedTraitsIndex(st)+1, intro.preferedTraitsInRoommate)
-			.bind(getUnpreferedTraitsIndex(st)+1, intro.unpreferedTraitsInRoommate)
-			.bind(getUsernameIndex()+1, intro.username)
-			;
-		} catch (SQLiteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	private static void bindIntroToStatement(final PreparedStatement st,final Introduction intro) throws SQLException {
+		
+		st.setInt(getUserIdIndex()+1, intro.getUserId());
+		st.setString(getCityIndex()+1, intro.getCity());
+		st.setString(getHobbiesIndex()+1, intro.getHobbies());
+		st.setString(getPreferedTraitsIndex()+1, intro.getPreferedTraitsInRoommate());
+		st.setString(getUnpreferedTraitsIndex()+1, intro.getUnpreferedTraitsInRoommate());
+		st.setString(getUsernameIndex()+1, intro.getUsername());
+		
+			
+			
+		
 	}
 
-	private static void stepAndDispose(final SQLiteStatement st) throws SQLiteException{
-        
-        try {
-            st.step();
-        }
-        finally {
-            st.dispose();
-        }
-    }
 	
-	private static void openDb(){
-		if (!DB.isOpen()){
-			try {
-				DB.open(true);
-			} catch (SQLiteException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+	
+	
 
-	public static void deleteIntro(final int id) {
+	public static boolean deleteIntro(final int id) {
 		openDb();
+		int updatedRows = 0;
+		
 		
 		try {
-			final SQLiteStatement st = DB.prepare("DELETE FROM " + TABLE_INTROS + " WHERE " + COLUMN_USER_ID +" = " + id);
-			stepAndDispose(st);
-		} catch (SQLiteException e) {
+			final PreparedStatement deleteStatement = DB.getPreparedStatement("DELETE FROM " + TABLE_INTROS + " WHERE " + COLUMN_USER_ID + " = " + id);
+			updatedRows = deleteStatement.executeUpdate();
+			
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+		return updatedRows > 0;
 	}
 	
 	public static Introduction getIntro(final int userId){
 		openDb();
 		
+		
 		try {
-			final SQLiteStatement st = DB.prepare("SELECT * FROM " + TABLE_INTROS + " WHERE " + COLUMN_USER_ID + " = " + userId );
+			final PreparedStatement queryStatement = DB.getPreparedStatement("SELECT * FROM " + TABLE_INTROS + " WHERE " + COLUMN_USER_ID + " = ?;");
+			queryStatement.setInt(1, userId);
+			System.out.println("Query  " + queryStatement.toString());
 			
-			st.step();
-			final Introduction intro = createIntro(st);
-			st.dispose();
-			return intro;
-		} catch (SQLiteException e) {
+			final ResultSet queryResult = queryStatement.executeQuery();
+			queryResult.next();
+			
+			return createIntro(queryResult);
+			
+		} catch (SQLException e) {
 			System.out.println("There's no row ith userId  " + userId);
+			e.printStackTrace();
 		}
 		
 		return null;
@@ -156,15 +160,15 @@ public final class DbUtil {
 		openDb();
 		
 		try {
-			final SQLiteStatement st = DB.prepare("SELECT * FROM " + TABLE_INTROS + " WHERE " + COLUMN_USERNAME + " = " + "'" + username + "';" );
+			final PreparedStatement queryStatement = DB.getPreparedStatement("SELECT * FROM " + TABLE_INTROS + " WHERE " + COLUMN_USERNAME +" = " + "'" + username + "';");
+			final ResultSet queryResult = queryStatement.executeQuery();
+			queryResult.next();
 			
-			st.step();
-			final Introduction intro = createIntro(st);
-			st.dispose();
-			return intro;
+
+			return createIntro(queryResult);
 		}
 		
-		catch(final SQLiteException e){
+		catch(final SQLException e){
 			System.out.println("There's no username with  " + username);
 		}
 		
@@ -186,52 +190,54 @@ public final class DbUtil {
 		openDb();
 		final ArrayList<Introduction> intros = new ArrayList<>();
 		try {
-			final SQLiteStatement st = DB.prepare("SELECT * FROM " + TABLE_INTROS);
+			final PreparedStatement queryStatement = DB.getPreparedStatement("SELECT * FROM " + TABLE_INTROS);
+			final ResultSet queryResult = queryStatement.executeQuery();
 			
-			while(st.step()){
-				intros.add(createIntro(st));
+			while(queryResult.next()){
+				intros.add(createIntro(queryResult));
 			}
 			
-			st.dispose();
 			
-		} catch (SQLiteException e) {
+			
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
 		return intros;
 	}
 
-	private static Introduction createIntro(SQLiteStatement st) throws SQLiteException {
-		final Introduction intro = new Introduction(st.columnInt(getUserIdIndex(st)),st.columnString(getCityIndex(st)));
-		intro.setUsername(st.columnString(getUsernameIndex()));
-		intro.setHobbies(st.columnString(getHobbiesIndex(st)));
-		intro.setPreferedTraitsInRoommate(st.columnString(getPreferedTraitsIndex(st)));
-		intro.setUnpreferedTraitsInRoommate(st.columnString(getUnpreferedTraitsIndex(st)));
+	private static Introduction createIntro(final ResultSet queryResult) throws SQLException {
+		final Introduction intro = new Introduction(queryResult.getInt(COLUMN_USER_ID),queryResult.getString(COLUMN_CITY));
+		intro.setUsername(queryResult.getString(COLUMN_USERNAME));
+		intro.setHobbies(queryResult.getString(COLUMN_HOBBIES));
+		intro.setPreferedTraitsInRoommate(queryResult.getString(COLUMN_PREFERED_TRAITS_IN_ROOMMATE));
+		intro.setUnpreferedTraitsInRoommate(queryResult.getString(COLUMN_UNPREFERED_TRAITS_IN_ROOMMATE));
+		System.out.println(intro.toString());
 		return intro;
 	}
 	
 	
-	private static int getUserIdIndex(final SQLiteStatement st) throws SQLiteException{
-		return st.getBindParameterIndex(COLUMN_USER_ID);
+	private static int getUserIdIndex(){
+		return 0;
 	}
 	
-	private static int getCityIndex(final SQLiteStatement st) throws SQLiteException{
+	private static int getCityIndex(){
 		return 1;
 	}
 	
-	private static int getHobbiesIndex(final SQLiteStatement st) throws SQLiteException{
+	private static int getHobbiesIndex(){
 		return 2;
 	}
 	
-	private static int getPreferedTraitsIndex(final SQLiteStatement st) throws SQLiteException{
+	private static int getPreferedTraitsIndex(){
 		return 3;
 	}
 	
-	private static int getUnpreferedTraitsIndex(final SQLiteStatement st) throws SQLiteException{
+	private static int getUnpreferedTraitsIndex(){
 		return 4;
 	}
 	
-	private static int getUsernameIndex() throws SQLiteException{
+	private static int getUsernameIndex(){
 		return 5;
 	}
 }

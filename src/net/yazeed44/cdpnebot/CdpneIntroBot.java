@@ -1,22 +1,15 @@
 package net.yazeed44.cdpnebot;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.telegram.BotConfig;
-import org.telegram.BuildVars;
 import org.telegram.SenderHelper;
-import org.telegram.api.ForceReply;
+import org.telegram.api.ForceReplyKeyboard;
 import org.telegram.api.Message;
 import org.telegram.api.Update;
-import org.telegram.api.User;
-import org.telegram.api.Video;
-import org.telegram.methods.SendDocument;
 import org.telegram.methods.SendMessage;
-import org.telegram.methods.SendVideo;
 import org.telegram.updateshandlers.UpdatesCallback;
 import org.telegram.updatesreceivers.UpdatesThread;
-import org.telegram.updatesreceivers.Webhook;
 
 
 
@@ -24,37 +17,22 @@ import org.telegram.updatesreceivers.Webhook;
 
 public class CdpneIntroBot implements UpdatesCallback {
 	
-	private static final int webhookPort = 9990;
-    private final Webhook webhook;
-    public static final String TOKEN = BotConfig.CDPNE_BOT_TOKEN;
+    public static final String TOKEN = BotConfig.TOKEN_CDPNE;
     
     public static final SendMessage DEFAULT_MESSAGE = new SendMessage();
-    public static final ForceReply DEFAULT_FORCE_REPLY = new ForceReply();
+    public static final ForceReplyKeyboard DEFAULT_FORCE_REPLY = new ForceReplyKeyboard();
 	
     public static final HashMap<Integer,Introduction> INTROS = new HashMap<>();
-	public CdpneIntroBot(){
-		if (BuildVars.useWebHook.booleanValue()) {
-            webhook = new Webhook(this, webhookPort);
-            SenderHelper.SendWebhook(webhook.getURL(), TOKEN);
-        } else {
-            webhook = null;
-            SenderHelper.SendWebhook("", TOKEN);
-            new UpdatesThread(TOKEN, this);
-        }
-		
-		setup();
+	
+    public CdpneIntroBot(){
+    	
+    	SenderHelper.SendWebhook("", TOKEN);
+    	new UpdatesThread(TOKEN, this);
+	
+        setup();
 	}
 	
-	@Override
-	public void onUpdatesReceived(List<Update> updates) {
-		
-		
-		for(final Update update : updates){
-			onUpdateReceived(update);
-		}
-		
-		
-	}
+	
 	
 	@Override
 	public void onUpdateReceived(Update update) {
@@ -178,6 +156,7 @@ public class CdpneIntroBot implements UpdatesCallback {
 		 
 		 DEFAULT_MESSAGE.setText(intro.generateIntroText());
 		 replyWithoutForce(message);
+		 
 		 
 	}
 

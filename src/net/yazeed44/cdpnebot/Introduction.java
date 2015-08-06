@@ -3,70 +3,94 @@ package net.yazeed44.cdpnebot;
 public class Introduction {
 	
 	
-	public final String city;
-	public final int userId;
-	public String username;
-	public String hobbies;
-	public String preferedTraitsInRoommate;
-	public String unpreferedTraitsInRoommate;
+	private final String mCity;
+	private final int mUserId;
+	private String mUsername;
+	private String mHobbies;
+	private String mPreferedTraitsInRoommate;
+	private String mUnpreferedTraitsInRoommate;
 
 	public Introduction(final int userId,final String city) {
 		super();
-		this.city = city;
-		this.userId = userId;
+		this.mCity = city;
+		this.mUserId = userId;
 	}
 	
 	@Override
 	public String toString() {
-		return "Introduction [city=" + city + ", userId=" + userId
-				+ ", hobbies=" + hobbies + ", preferedTraitsInRoommate="
-				+ preferedTraitsInRoommate + ", unpreferedTraitsInRoommate="
-				+ unpreferedTraitsInRoommate + "]";
+		return "Introduction [city=" + getCity() + ", userId=" + getUserId()
+				+ ", hobbies=" + getHobbies() + ", preferedTraitsInRoommate="
+				+ getPreferedTraitsInRoommate() + ", unpreferedTraitsInRoommate="
+				+ getUnpreferedTraitsInRoommate() + "]";
 	}
 	
 	
 
 	@Override
 	public boolean equals(final Object obj){
-		return obj instanceof Introduction && ((Introduction)obj).userId == userId;
+		return obj instanceof Introduction && ((Introduction)obj).getUserId() == getUserId();
 	}
 	
 	
 
+	public int getUserId() {
+		return mUserId;
+	}
+
+	public String getCity() {
+		return mCity;
+	}
+
 	public void setHobbies(String hobbies) {
-		this.hobbies = hobbies;
+		this.mHobbies = hobbies;
+	}
+
+	public String getHobbies() {
+		return mHobbies;
 	}
 
 	public void setPreferedTraitsInRoommate(String prefereredTraitsInRoommate) {
-		this.preferedTraitsInRoommate = prefereredTraitsInRoommate;
+		this.mPreferedTraitsInRoommate = prefereredTraitsInRoommate;
+	}
+
+	public String getPreferedTraitsInRoommate() {
+		return mPreferedTraitsInRoommate;
 	}
 
 	public void setUnpreferedTraitsInRoommate(String unpreferedTraitsInRoommate) {
-		this.unpreferedTraitsInRoommate = unpreferedTraitsInRoommate;
+		mUnpreferedTraitsInRoommate = unpreferedTraitsInRoommate;
 	}
 	
+	public String getUnpreferedTraitsInRoommate() {
+		return mUnpreferedTraitsInRoommate;
+	}
+
 	public void setUsername(final String username){
-		this.username = username;
+		this.mUsername = username;
 	}
 
 	
+	public String getUsername() {
+		return mUsername;
+	}
+
 	public String generateIntroText(){
 		final StringBuilder builder = new StringBuilder();
 		
 		
-		builder.append("@"+username)
+		builder.append("@"+getUsername())
 		.append("\n -")
 		.append("المدينة : ")
-		.append(city)
+		.append(getCity())
 		.append("\n -")
 		.append("الهوايات : ")
-		.append(hobbies)
+		.append(getHobbies())
 		.append("\n -")
 		.append("الصفات المرغوبة في الروم ميت : ")
-		.append(preferedTraitsInRoommate)
+		.append(getPreferedTraitsInRoommate())
 		.append("\n -")
 		.append("الصفات الغير محببة في الروم ميت : ")
-		.append(unpreferedTraitsInRoommate);
+		.append(getUnpreferedTraitsInRoommate());
 		
 		
 		
